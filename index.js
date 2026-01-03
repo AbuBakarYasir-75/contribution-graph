@@ -3,22 +3,34 @@ import moment from 'moment';
 import simpleGit from 'simple-git';
 import random from 'random';
 
+const git = simpleGit();
 const path = './data.json';
-const date = moment().subtract(5, 'd').format('');
 
 const makeCommits = (n) => {
-    if (n === 0) return simpleGit.push();
-    const x = random.int(0, 54);
-    const y = random.int(0, 6);
-    const date = moment().subtract(1, 'y').add(1, 'd').add(x, 'w').add(y, 'd').format('');
-    
-    const data = {
-        date: date,
-    }
-    console.log(date);
-    jsonfile.writeFile(path, data, () => {
-        simpleGit().add([path]).commit(date, {'--date': date}), makeCommits.bind(this, --n);
-    })
-}
+  if (n === 0) {
+    console.log('✅ All commits done');
+    return git.push();
+  }
 
-makeCommits(100);
+  const x = random.int(0, 54);
+  const y = random.int(0, 6);
+
+  const date = moment()
+    .subtract(1, 'y')
+    .add(x, 'w')
+    .add(y, 'd')
+    .format('YYYY-MM-DD HH:mm:ss');
+
+  const data = { date };
+
+  console.log(`📅 Commit date: ${date}`);
+
+  jsonfile.writeFile(path, data, () => {
+    git
+      .add([path])
+      .commit(date, { '--date': date })
+      .then(() => makeCommits(n - 1));
+  });
+};
+
+makeCommits(1000);
